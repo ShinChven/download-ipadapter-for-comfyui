@@ -1,44 +1,59 @@
-# ComfyUI IP-Adapter Downloader
+# ComfyUI Model Downloaders
 
-A simple and robust shell script to download all the official IP-Adapter models for ComfyUI.
+A collection of robust shell scripts to download various model sets for ComfyUI.
 
-This script automates the tedious process of downloading each model and placing it in the correct directory within your ComfyUI installation.
+These scripts automate the process of downloading models and placing them in the correct directories within your ComfyUI installation.
+
+## Available Scripts
+
+### 1. IP-Adapter Models (`download-ipadapters.sh`)
+Downloads official IP-Adapter models (Standard, FaceID, SDXL) along with necessary CLIP Vision encoders and LoRAs.
+
+### 2. Qwen Image Models (`download_qwen_image_models.sh`)
+Downloads Qwen Image models including text encoders, LoRAs, diffusion models, and VAE.
+
+### 3. Z-Image Models (`download_z_image_models.sh`)
+Downloads Z-Image models including text encoders, diffusion models, and VAE.
 
 ## Features
 
-- **Comprehensive:** Downloads all standard, face, and SDXL IP-Adapter models, including the necessary CLIP Vision encoders and community models.
-- **Correct Placement:** Automatically creates the required `models/ipadapter`, `models/clip_vision`, `models/loras`, and `models/insightface` directories.
-- **Efficient:** Uses `aria2c` for multi-connection accelerated downloads if it's installed, otherwise falls back to `wget`.
-- **Safe:** Checks for existing files and skips them, so you can run the script multiple times without re-downloading everything. It will also resume partially downloaded files.
-- **Flexible:** Works with absolute and relative paths, so you can use paths like `/path/to/ComfyUI`, `../ComfyUI`, or `.` with ease.
+- **Correct Placement:** Automatically places files in the correct `models/*` subdirectories (e.g., `models/ipadapter`, `models/diffusion_models`, `models/text_encoders`).
+- **Efficient:** Uses `aria2c` for multi-connection accelerated downloads if installed; otherwise defaults to `wget`.
+- **Smart Resume:** Skips existing complete files and resumes partial downloads.
+- **Flexible Paths:** Accepts absolute or relative paths to your ComfyUI directory.
 
 ## Requirements
 
-- A `bash` shell (standard on Linux and macOS).
-- `wget` or `aria2c` installed on your system.
+- A `bash` shell (macOS, Linux, WSL).
+- `wget` OR `aria2c` installed.
 
 ## Usage
 
-1.  **Make the script executable:**
-    ```bash
-    chmod +x download-ipadapters.sh
-    ```
+Run the desired script with `bash` and provide the path to your ComfyUI root directory.
 
-2.  **Run the script:**
-    Provide the path to your ComfyUI root directory as the only argument.
+### Download IP-Adapter Models
+```bash
+bash download-ipadapters.sh /path/to/ComfyUI
+```
 
-    ```bash
-    ./download-ipadapters.sh /path/to/your/ComfyUI
-    ```
+### Download Qwen Image Models
+```bash
+bash download_qwen_image_models.sh /path/to/ComfyUI
+```
 
-    For example:
-    ```bash
-    # If ComfyUI is in your home directory
-    ./download-ipadapters.sh ~/ComfyUI
+### Download Z-Image Models
+```bash
+bash download_z_image_models.sh /path/to/ComfyUI
+```
 
-    # If you are running the script from within your ComfyUI directory
-    ./download-ipadapters.sh .
-    ```
+### Examples
+```bash
+# If ComfyUI is in your home directory
+bash download_qwen_image_models.sh ~/ComfyUI
+
+# If you are already inside your ComfyUI directory
+bash download_z_image_models.sh .
+```
 
 ## License
 
