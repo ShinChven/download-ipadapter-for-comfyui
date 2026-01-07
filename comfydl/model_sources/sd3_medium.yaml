@@ -1,0 +1,5 @@
+description: "Stable Diffusion 3 Medium (including CLIPs)"
+source: "https://huggingface.co/stabilityai/stable-diffusion-3-medium"
+downloads:
+  - url: "https://huggingface.co/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium_incl_clips.safetensors"
+    dest: "models/checkpoints/sd3_medium_incl_clips.safetensors"
