@@ -1,0 +1,5 @@
+description: "ControlNet v1.1 canny for Stable Diffusion 1.5"
+source: "https://huggingface.co/comfyanonymous/ControlNet-v1-1_fp16_safetensors"
+downloads:
+  - url: "https://huggingface.co/comfyanonymous/ControlNet-v1-1_fp16_safetensors/resolve/main/control_v11p_sd15_canny_fp16.safetensors"
+    dest: "models/controlnet/control_v11p_sd15_canny_fp16.safetensors"
