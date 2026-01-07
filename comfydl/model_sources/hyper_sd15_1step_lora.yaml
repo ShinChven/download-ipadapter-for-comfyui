@@ -1,0 +1,5 @@
+description: "Hyper-SD SD15 LoRA (1-step)"
+source: "https://huggingface.co/ByteDance/Hyper-SD"
+downloads:
+  - url: "https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SD15-1step-lora.safetensors"
+    dest: "models/loras/Hyper-SD15-1step-lora.safetensors"
