@@ -1,0 +1,5 @@
+description: "Hunyuan3D-2 3D generation model"
+source: "https://docs.comfy.org/tutorials/3d/hunyuan3D-2"
+downloads:
+  - url: "https://huggingface.co/tencent/Hunyuan3D-2mv/resolve/main/hunyuan3d-dit-v2-mv/model.fp16.safetensors"
+    dest: "models/checkpoints/hunyuan3d-dit-v2-mv.safetensors"

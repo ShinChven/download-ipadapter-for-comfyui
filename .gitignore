@@ -2,6 +2,7 @@ output/
 lib/
 .vscode/
 models/
+comfy-org-docs/
 
 test/config.json
 
