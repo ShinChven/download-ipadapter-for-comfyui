@@ -47,7 +47,7 @@ comfydl set COMFYUI_ROOT /path/to/your/ComfyUI
 comfydl set CIVITAI_TOKEN your_api_token
 ```
 
-*These settings are persisted locally.*
+*These settings are persisted locally in `~/.comfydl_config`.*
 
 ## Usage
 
@@ -73,29 +73,53 @@ comfydl ipadapters
 comfydl z_image
 ```
 
-### Custom Model Sources
+### Civitai Download
 
-`comfydl` comes with built-in configurations (e.g., `flux`, `ipadapters`). You can verify available sources by looking at the `comfydl/model_sources` directory.
-
-To use your own custom model list, create a YAML file and pass its path:
+You can quickly download a model from Civitai using its Model Version ID or directly using the download URL. The tool will automatically determine the correct folder (e.g., `models/checkpoints`, `models/loras`) based on the model type.
 
 ```bash
-comfydl my_custom_models.yaml
+# Using Model Version ID
+comfydl civitai 1234567
+
+# Using Direct Download URL
+comfydl civitai "https://civitai.com/api/download/models/12345?type=Model&format=SafeTensor"
+
+# Optional: Override ComfyUI root path
+comfydl civitai 12345 /path/to/ComfyUI
 ```
 
-You can also place your custom model source YAML files in `~/.comfydl/model_sources/`.
-Any file in this directory (e.g., `~/.comfydl/model_sources/mysource.yaml`) will be automatically detected and can be used by name (e.g., `comfydl mysource`).
-User-defined sources take precedence over built-in sources with the same name.
+*Note: If you have configured `CIVITAI_TOKEN`, it will be automatically appended to the request to support downloading restricted or early-access models.*
+
+### Model Sources & Resolution
+
+`comfydl` resolves model source names (e.g., `flux`) by checking locations in the following order:
+
+1.  **Exact File Path**: If you provide a path to a YAML file, it is used directly.
+2.  **User Global Storage**: Checks `~/.comfydl/model_sources/<name>.yaml`.
+    *   Use this to override built-in sources or add personal collections available globally.
+3.  **Built-in Sources**: Checks the `model_sources` directory bundled with the installed `comfydl` package.
+4.  **Local Project Storage**: Checks `model_sources/<name>.yaml` in your current working directory.
+
+### Custom Model Sources
+
+To define your own model source, create a YAML file. You can place it in `~/.comfydl/model_sources/` to make it discoverable by name (e.g., `comfydl mysource`).
 
 **YAML Format Example:**
 
 ```yaml
+description: "My Custom Model Collection"
 downloads:
   - url: "https://huggingface.co/some/model.safetensors"
     dest: "models/checkpoints/model.safetensors"
   - url: "https://civitai.com/api/download/models/12345"
     dest: "models/loras/mylora.safetensors"
 ```
+
+## Contributing
+
+### Adding New Default Sources
+
+If you are a maintainer or contributor wishing to add new built-in model sources to the package, please refer to [CREATE_MODEL_SOURCE.md](CREATE_MODEL_SOURCE.md).
 
 ## Legacy Scripts
 

@@ -93,8 +93,20 @@ def process_download(model_source_path, comfyui_path, downloader=None):
         print(f"Error loading YAML: {e}")
         return False
         
-    downloads = config_data if isinstance(config_data, list) else config_data.get('downloads', [])
+    if config_data is None:
+        print(f"Error: Empty configuration file: {model_source_path}")
+        return False
+
+    downloads = []
+    if isinstance(config_data, list):
+        downloads = config_data
+    elif isinstance(config_data, dict):
+        downloads = config_data.get('downloads', [])
     
+    if not downloads:
+        print(f"Warning: No downloads found in {model_source_path}")
+        return True
+
     for item in downloads:
         url = item.get('url')
         dest = item.get('dest')
@@ -107,6 +119,8 @@ def process_download(model_source_path, comfyui_path, downloader=None):
         download_file(url, full_dest, downloader)
     return True
 
+from .civitai import process_civitai_download
+
 def main():
     parser = argparse.ArgumentParser(description="ComfyDL: ComfyUI Model Downloader")
     subparsers = parser.add_subparsers(dest="command")
@@ -116,41 +130,50 @@ def main():
     set_parser.add_argument("key", help="Configuration key (e.g., COMFYUI_ROOT, CIVITAI_TOKEN)")
     set_parser.add_argument("value", help="Configuration value")
     
-    # args are tricky because we want positional args for download but 'set' is a command
-    # simple approach: check sys.argv[1] manually or use simple argparse logic
-    
-    # The requirement: comfydl <model_source> [comfyui_path]
-    # And: comfydl set <key> <value>
-    
-    if len(sys.argv) > 1 and sys.argv[1] == "set":
-        # Handle set manually or let argparse handle it if structured well
-        pass
-    else:
-        # It's a download command
-        # We need to add arguments for the main parser or implicit "download" command
-        pass
+    # Civitai command
+    civitai_parser = subparsers.add_parser("civitai", help="Download model from Civitai by Model Version ID or URL")
+    civitai_parser.add_argument("version_id", help="Civitai Model Version ID (integer) or Download URL")
+    civitai_parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
 
-    # Let's restructure to be robust
-    if len(sys.argv) > 1 and sys.argv[1] == "set":
-         args = parser.parse_args()
-         handle_set(args.key, args.value)
-         return
+    # To handle the existing "default" behavior (comfydl <source>), we check sys.argv
+    # If the first argument is a known command, we parse.
+    # Otherwise, we treat it as the legacy/default behavior.
+    
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "set":
+            args = parser.parse_args()
+            handle_set(args.key, args.value)
+            return
+        elif sys.argv[1] == "civitai":
+            args = parser.parse_args()
+            
+            comfyui_path = args.comfyui_path
+            if not comfyui_path:
+                comfyui_path = get_config_value("COMFYUI_ROOT")
+                
+            if not comfyui_path:
+                 # Fallback to current dir if it looks like ComfyUI? Or error
+                 # Actually, let's enforce it or check current dir
+                 pass # check below
+                 
+            if not comfyui_path:
+                print("Error: ComfyUI path not specified.")
+                sys.exit(1)
+            
+            # Check for main.py to confirm it's likely ComfyUI
+            if not os.path.exists(os.path.join(comfyui_path, "main.py")):
+                print(f"Warning: '{comfyui_path}' does not look like a ComfyUI directory (main.py missing).")
 
-    # If not set, treat as download arguments
+            process_civitai_download(args.version_id, comfyui_path)
+            return
+
+    # If not a subcommand, use the original parser logic for sources
     parser = argparse.ArgumentParser(description="ComfyDL: ComfyUI Model Downloader")
     parser.add_argument("model_source", nargs="?", help="Model source name (e.g. 'flux') or path to YAML config")
     parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
     
-    # If the first arg is 'set', this parser would fail/confuse, but we handled 'set' above.
-    # However, 'comfydl set ...' falling here means sys.argv needs care.
-    # Actually, argparse subcommands is better but user wants `comfydl <source>` directly, not `comfydl download <source>`.
-    
-    # So we used the manual check for 'set'.
-    
     args = parser.parse_args()
     
-    # Logic for download
-
     # Logic for download
     # Check for ComfyUI path first as it is required for any download
     comfyui_path = args.comfyui_path

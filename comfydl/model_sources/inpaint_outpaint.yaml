@@ -1,0 +1,5 @@
+description: "Stable Diffusion 2.1 Inpainting Model (512 EMA)"
+source: "https://docs.comfy.org/tutorials/basic/inpaint"
+downloads:
+  - url: "https://huggingface.co/Comfy-Org/stable_diffusion_2.1_repackaged/resolve/main/512-inpainting-ema.safetensors"
+    dest: "models/checkpoints/512-inpainting-ema.safetensors"
