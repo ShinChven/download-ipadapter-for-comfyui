@@ -122,7 +122,7 @@ downloads:
 
 ### Adding New Default Sources
 
-If you are a maintainer or contributor wishing to add new built-in model sources to the package, please refer to [CREATE_MODEL_SOURCE.md](CREATE_MODEL_SOURCE.md).
+If you are a maintainer or contributor wishing to add new built-in model sources to the package, please refer to [MODEL_SOURCE.md](MODEL_SOURCE.md).
 
 ## Legacy Scripts
 
