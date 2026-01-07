@@ -2,7 +2,16 @@
 
 **ComfyDL** is a robust Command Line Interface (CLI) tool for downloading models for ComfyUI. It automates the process of fetching models from various sources (like Hugging Face, Civitai) and placing them into the correct directories within your ComfyUI installation.
 
-It replaces the legacy collection of shell scripts with a unified, configurable Python application.
+## Install ComfyUI Models with Ease
+
+```bash
+comfydl flux
+comfydl pony
+comfydl sd15
+comfydl qwen_image_edit
+comfydl chilloutmix
+comfydl civitai 354657 # Dreamshaper lightning DPM++ SDE
+```
 
 ## Features
 
