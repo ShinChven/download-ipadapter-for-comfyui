@@ -1,0 +1,11 @@
+description: "Wan2.1 I2V ATI 14B (Trajectory Control)"
+source: "https://docs.comfy.org/tutorials/video/wan/wan-ati"
+downloads:
+  - url: "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1-I2V-ATI-14B_fp8_e4m3fn.safetensors"
+    dest: "models/diffusion_models/Wan2_1-I2V-ATI-14B_fp8_e4m3fn.safetensors"
+  - url: "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors?download=true"
+    dest: "models/vae/wan_2.1_vae.safetensors"
+  - url: "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors?download=true"
+    dest: "models/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors"
+  - url: "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
+    dest: "models/clip_vision/clip_vision_h.safetensors"

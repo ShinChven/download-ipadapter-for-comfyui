@@ -1,0 +1,9 @@
+description: "Wan-Alpha (Video with Alpha Channel Transparency)"
+source: "https://docs.comfy.org/tutorials/video/wan/wan-alpha"
+downloads:
+  - url: "https://huggingface.co/htdong/Wan-Alpha_ComfyUI/resolve/main/epoch-13-1500_changed.safetensors?download=true"
+    dest: "models/checkpoints/epoch-13-1500_changed.safetensors"
+  - url: "https://huggingface.co/htdong/Wan-Alpha_ComfyUI/resolve/main/wan_alpha_2.1_vae_alpha_channel.safetensors.safetensors?download=true"
+    dest: "models/vae/wan_alpha_2.1_vae_alpha_channel.safetensors"
+  - url: "https://huggingface.co/htdong/Wan-Alpha_ComfyUI/resolve/main/wan_alpha_2.1_vae_rgb_channel.safetensors.safetensors?download=true"
+    dest: "models/vae/wan_alpha_2.1_vae_rgb_channel.safetensors"
