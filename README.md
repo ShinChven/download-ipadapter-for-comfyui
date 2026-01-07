@@ -79,6 +79,10 @@ To use your own custom model list, create a YAML file and pass its path:
 comfydl my_custom_models.yaml
 ```
 
+You can also place your custom model source YAML files in `~/.comfydl/model_sources/`.
+Any file in this directory (e.g., `~/.comfydl/model_sources/mysource.yaml`) will be automatically detected and can be used by name (e.g., `comfydl mysource`).
+User-defined sources take precedence over built-in sources with the same name.
+
 **YAML Format Example:**
 
 ```yaml

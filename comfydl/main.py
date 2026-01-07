@@ -17,6 +17,17 @@ def resolve_model_source(source_name):
     # Check if exact path
     if os.path.exists(source_name):
         return source_name
+
+    # Check user home override directory (~/.comfydl/model_sources)
+    user_sources = Path.home() / ".comfydl" / "model_sources"
+    if user_sources.exists():
+        candidate = user_sources / f"{source_name}.yaml"
+        if candidate.exists():
+            return str(candidate)
+
+        candidate = user_sources / source_name
+        if candidate.exists():
+            return str(candidate)
     
     # Check in local model_sources directory (bundled with package)
     package_dir = Path(__file__).parent
@@ -44,6 +55,12 @@ def resolve_model_source(source_name):
 def get_available_sources():
     sources = set()
     
+    # Check user home sources
+    user_sources = Path.home() / ".comfydl" / "model_sources"
+    if user_sources.exists():
+        for f in user_sources.glob("*.yaml"):
+            sources.add(f.stem)
+
     # Check bundled
     package_dir = Path(__file__).parent
     bundled_sources = package_dir / "model_sources"
