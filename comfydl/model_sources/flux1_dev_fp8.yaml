@@ -2,7 +2,7 @@ description: "Flux 1 Dev Model (FP8)"
 source: "https://docs.comfy.org/tutorials/flux/flux-1-text-to-image"
 downloads:
   - url: "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors"
-    dest: "models/checkpoints/flux1-dev-fp8.safetensors"
+    dest: "models/diffusion_models/flux1-dev-fp8.safetensors"
   - url: "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors"
     dest: "models/text_encoders/clip_l.safetensors"
   - url: "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors"
