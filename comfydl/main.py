@@ -42,7 +42,16 @@ def resolve_model_source(source_name):
         if candidate.exists():
             return str(candidate)
             
-    # Check current working directory for local overrides/custom files
+    # Check in subdirectory of current working directory (comfydl/model_sources)
+    local_dev_sources = Path("comfydl/model_sources")
+    if local_dev_sources.exists():
+        candidate = local_dev_sources / f"{source_name}.yaml"
+        if candidate.exists():
+            return str(candidate)
+        
+        candidate = local_dev_sources / source_name
+        if candidate.exists():
+            return str(candidate)
     cwd_sources = Path("model_sources")
     if cwd_sources.exists():
          candidate = cwd_sources / f"{source_name}.yaml"
@@ -68,7 +77,13 @@ def get_available_sources():
         for f in bundled_sources.glob("*.yaml"):
             sources.add(f.stem)
     
-    # Check local
+    # Check local development
+    local_dev_sources = Path("comfydl/model_sources")
+    if local_dev_sources.exists():
+        for f in local_dev_sources.glob("*.yaml"):
+            sources.add(f.stem)
+
+    # Check local 'model_sources' directory
     cwd_sources = Path("model_sources")
     if cwd_sources.exists():
         for f in cwd_sources.glob("*.yaml"):
@@ -135,6 +150,9 @@ def main():
     civitai_parser.add_argument("version_id", help="Civitai Model Version ID (integer) or Download URL")
     civitai_parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
 
+    # List command
+    subparsers.add_parser("list", help="List available model sources")
+
     # To handle the existing "default" behavior (comfydl <source>), we check sys.argv
     # If the first argument is a known command, we parse.
     # Otherwise, we treat it as the legacy/default behavior.
@@ -165,6 +183,15 @@ def main():
                 print(f"Warning: '{comfyui_path}' does not look like a ComfyUI directory (main.py missing).")
 
             process_civitai_download(args.version_id, comfyui_path)
+            return
+        elif sys.argv[1] == "list":
+            sources = get_available_sources()
+            if not sources:
+                print("No model sources found.")
+            else:
+                print("Available model sources:")
+                for s in sources:
+                    print(f"  - {s}")
             return
 
     # If not a subcommand, use the original parser logic for sources
@@ -205,7 +232,7 @@ def main():
         model_source_path = resolve_model_source(args.model_source)
         if not model_source_path:
             print(f"Error: Model source '{args.model_source}' not found.")
-            print("Expected a file path or a name in 'model_sources/' directory (e.g. 'flux' for 'model_sources/flux.yaml').")
+            print("Try 'comfydl list' to see available sources.")
             sys.exit(1)
         
         process_download(model_source_path, comfyui_path, downloader)
