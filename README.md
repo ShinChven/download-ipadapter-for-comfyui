@@ -26,6 +26,10 @@ It replaces the legacy collection of shell scripts with a unified, configurable 
 pip install git+https://github.com/ShinChven/comfydl.git
 ```
 
+```bash
+pip install -U git+https://github.com/ShinChven/comfydl.git
+```
+
 ## Jupyter / Colab Setup
 
 ```python
