@@ -4,7 +4,7 @@
 
 ## Install ComfyUI Models with Ease
 
-```bash
+```sh
 comfydl flux1
 comfydl flux1_dev_fp8
 comfydl pony
