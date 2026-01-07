@@ -1,59 +1,97 @@
-# ComfyUI Model Downloaders
+# ComfyDL
 
-A collection of robust shell scripts to download various model sets for ComfyUI.
+**ComfyDL** is a robust Command Line Interface (CLI) tool for downloading models for ComfyUI. It automates the process of fetching models from various sources (like Hugging Face, Civitai) and placing them into the correct directories within your ComfyUI installation.
 
-These scripts automate the process of downloading models and placing them in the correct directories within your ComfyUI installation.
-
-## Available Scripts
-
-### 1. IP-Adapter Models (`download-ipadapters.sh`)
-Downloads official IP-Adapter models (Standard, FaceID, SDXL) along with necessary CLIP Vision encoders and LoRAs.
-
-### 2. Qwen Image Models (`download_qwen_image_models.sh`)
-Downloads Qwen Image models including text encoders, LoRAs, diffusion models, and VAE.
-
-### 3. Z-Image Models (`download_z_image_models.sh`)
-Downloads Z-Image models including text encoders, diffusion models, and VAE.
+It replaces the legacy collection of shell scripts with a unified, configurable Python application.
 
 ## Features
 
-- **Correct Placement:** Automatically places files in the correct `models/*` subdirectories (e.g., `models/ipadapter`, `models/diffusion_models`, `models/text_encoders`).
-- **Efficient:** Uses `aria2c` for multi-connection accelerated downloads if installed; otherwise defaults to `wget`.
-- **Smart Resume:** Skips existing complete files and resumes partial downloads.
-- **Flexible Paths:** Accepts absolute or relative paths to your ComfyUI directory.
+-   **Smart Downloads**: Automatically places files in the correct `models/*` subdirectories (e.g., `models/ipadapter`, `models/diffusion_models`).
+-   **Multi-Source Support**: Easily download from Hugging Face, Civitai, and more using YAML configurations.
+-   **Interactive Menu**: Select models to download from a user-friendly list.
+-   **Resumable**: Uses `aria2c` (recommended) or `wget` for reliable, resumable downloads.
+-   **Configurable**: Set your ComfyUI root path and API tokens once, and they are remembered.
+
+## Installation
+
+You can install `comfydl` directly from the source:
+
+```bash
+git clone https://github.com/ShinChven/download-ipadapter-for-comfyui.git
+cd download-ipadapter-for-comfyui
+pip install -e .
+```
+
+*Using a virtual environment is recommended.*
 
 ## Requirements
 
-- A `bash` shell (macOS, Linux, WSL).
-- `wget` OR `aria2c` installed.
+-   **Python 3.8+**
+-   **Download Tools**: `aria2c` (highly recommended for speed) or `wget`.
+    -   macOS: `brew install aria2`
+    -   Linux: `sudo apt install aria2`
+
+## Configuration
+
+Before starting, configure your ComfyUI root directory. You can also set a Civitai token if downloading restricted models.
+
+```bash
+# Set ComfyUI Root Path
+comfydl set COMFYUI_ROOT /path/to/your/ComfyUI
+
+# (Optional) Set Civitai API Token
+comfydl set CIVITAI_TOKEN your_api_token
+```
+
+*These settings are persisted locally.*
 
 ## Usage
 
-Run the desired script with `bash` and provide the path to your ComfyUI root directory.
+### Interactive Mode
 
-### Download IP-Adapter Models
+Simply run `comfydl` without arguments to launch the interactive menu. You can select multiple model sets to download.
+
 ```bash
-bash download-ipadapters.sh /path/to/ComfyUI
+comfydl
 ```
 
-### Download Qwen Image Models
+### Command Line Mode
+
+Download a specific model set directly by name:
+
 ```bash
-bash download_qwen_image_models.sh /path/to/ComfyUI
+# General syntax
+comfydl <model_source_name> [comfyui_path_override]
+
+# Examples
+comfydl flux
+comfydl ipadapters
+comfydl z_image
 ```
 
-### Download Z-Image Models
+### Custom Model Sources
+
+`comfydl` comes with built-in configurations (e.g., `flux`, `ipadapters`). You can verify available sources by looking at the `comfydl/model_sources` directory.
+
+To use your own custom model list, create a YAML file and pass its path:
+
 ```bash
-bash download_z_image_models.sh /path/to/ComfyUI
+comfydl my_custom_models.yaml
 ```
 
-### Examples
-```bash
-# If ComfyUI is in your home directory
-bash download_qwen_image_models.sh ~/ComfyUI
+**YAML Format Example:**
 
-# If you are already inside your ComfyUI directory
-bash download_z_image_models.sh .
+```yaml
+downloads:
+  - url: "https://huggingface.co/some/model.safetensors"
+    dest: "models/checkpoints/model.safetensors"
+  - url: "https://civitai.com/api/download/models/12345"
+    dest: "models/loras/mylora.safetensors"
 ```
+
+## Legacy Scripts
+
+The original shell scripts (e.g., `download-ipadapters.sh`) are still present in the repository for reference but `comfydl` is the recommended way to download models.
 
 ## License
 
