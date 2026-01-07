@@ -1,0 +1,5 @@
+description: "Stable Diffusion XL Lightning (8-step Checkpoint)"
+source: "https://huggingface.co/ByteDance/SDXL-Lightning"
+downloads:
+  - url: "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_8step.safetensors"
+    dest: "models/checkpoints/sdxl_lightning_8step.safetensors"
