@@ -56,8 +56,20 @@ def download_file(url, filepath, downloader):
                 "--console-log-level=warn", "-c",
                 "-d", directory, "-o", filename, final_url
             ]
+            if "huggingface.co" in final_url:
+                hf_token = get_config_value("HF_TOKEN")
+                if hf_token:
+                    cmd.insert(-1, f"--header=Authorization: Bearer {hf_token}")
         elif downloader == "wget":
-            cmd = ["wget", "-c", "-O", filepath, final_url]
+            cmd = ["wget", "-c", "-O", filepath]
+            
+            if "huggingface.co" in final_url:
+                hf_token = get_config_value("HF_TOKEN")
+                if hf_token:
+                    cmd.append(f"--header=Authorization: Bearer {hf_token}")
+                    cmd.append("--content-disposition")
+
+            cmd.append(final_url)
         else:
             # Fallback to python requests if needed, but for now we error or just warn
             print("Error: No external downloader found (aria2c/wget).")

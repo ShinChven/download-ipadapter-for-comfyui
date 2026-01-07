@@ -45,6 +45,9 @@ comfydl set COMFYUI_ROOT /path/to/your/ComfyUI
 
 # (Optional) Set Civitai API Token
 comfydl set CIVITAI_TOKEN your_api_token
+
+# (Optional) Set Hugging Face Token (for private/gated models)
+comfydl set HF_TOKEN your_hf_token
 ```
 
 *These settings are persisted locally in `~/.comfydl_config`.*

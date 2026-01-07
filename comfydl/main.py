@@ -8,7 +8,7 @@ from .utils import check_downloader, download_file
 import questionary
 
 def handle_set(key, value):
-    valid_keys = ["COMFYUI_ROOT", "CIVITAI_TOKEN"]
+    valid_keys = ["COMFYUI_ROOT", "CIVITAI_TOKEN", "HF_TOKEN"]
     if key not in valid_keys:
         print(f"Warning: '{key}' is not a standard configuration key. Valid keys: {valid_keys}")
     set_config_value(key, value)
