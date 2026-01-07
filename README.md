@@ -1,5 +1,10 @@
 # ComfyDL
 
+[![PyPI version](https://img.shields.io/pypi/v/comfydl.svg)](https://pypi.org/project/comfydl/)
+[![Python versions](https://img.shields.io/pypi/pyversions/comfydl.svg)](https://pypi.org/project/comfydl/)
+[![License](https://img.shields.io/pypi/l/comfydl.svg)](https://github.com/ShinChven/comfydl/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/comfydl.svg)](https://pypi.org/project/comfydl/)
+
 **ComfyDL** is a robust Command Line Interface (CLI) tool for downloading models for ComfyUI. It automates the process of fetching models from various sources (like Hugging Face, Civitai) and placing them into the correct directories within your ComfyUI installation.
 
 ## Install ComfyUI Models with Ease
@@ -8,7 +13,7 @@
 comfydl flux1
 comfydl flux1_dev_fp8
 comfydl pony
-comfydl sd15
+comfydl dreamshaper
 comfydl common_vae
 comfydl qwen_image_edit
 comfydl chilloutmix
@@ -33,10 +38,19 @@ comfydl civitai 354657 # Dreamshaper lightning DPM++ SDE
 
 ## Installation
 
+### Via PyPI (Recommended)
+
+```bash
+pip install comfydl
+```
+
+### Via Git
+
 ```bash
 pip install git+https://github.com/ShinChven/comfydl.git
 ```
 
+To update:
 ```bash
 pip install -U git+https://github.com/ShinChven/comfydl.git
 ```
@@ -45,9 +59,9 @@ pip install -U git+https://github.com/ShinChven/comfydl.git
 
 ```python
 !apt-get update && apt-get install aria2
-!pip install git+https://github.com/ShinChven/comfydl.git
+!pip install comfydl
 !comfydl set COMFYUI_ROOT /content/ComfyUI
-!mkdir /content/ComfyUI/
+!mkdir -p /content/ComfyUI/
 ```
 
 ## Configuration
