@@ -2,10 +2,20 @@ import argparse
 import os
 import sys
 import yaml
+import math
 from pathlib import Path
 from .config import set_config_value, get_config_value
 from .utils import check_downloader, download_file
 import questionary
+
+def format_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return f"{s} {size_name[i]}"
 
 def handle_set(key, value):
     valid_keys = ["COMFYUI_ROOT", "CIVITAI_TOKEN", "HF_TOKEN"]
@@ -150,8 +160,12 @@ def main():
     civitai_parser.add_argument("version_id", help="Civitai Model Version ID (integer) or Download URL")
     civitai_parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
 
-    # List command
-    subparsers.add_parser("list", help="List available model sources")
+    # Sources command
+    subparsers.add_parser("sources", help="List available model sources")
+
+    # List command (local models)
+    list_parser = subparsers.add_parser("list", help="List downloaded models in ComfyUI models directory")
+    list_parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
 
     # To handle the existing "default" behavior (comfydl <source>), we check sys.argv
     # If the first argument is a known command, we parse.
@@ -184,7 +198,7 @@ def main():
 
             process_civitai_download(args.version_id, comfyui_path)
             return
-        elif sys.argv[1] == "list":
+        elif sys.argv[1] == "sources":
             sources = get_available_sources()
             if not sources:
                 print("No model sources found.")
@@ -192,6 +206,43 @@ def main():
                 print("Available model sources:")
                 for s in sources:
                     print(f"  - {s}")
+            return
+        elif sys.argv[1] == "list":
+            args, _ = parser.parse_known_args()
+            comfyui_path = args.comfyui_path
+            if not comfyui_path:
+                comfyui_path = get_config_value("COMFYUI_ROOT")
+            
+            if not comfyui_path:
+                print("Error: ComfyUI path not specified.")
+                sys.exit(1)
+            
+            comfyui_path = os.path.abspath(comfyui_path)
+            models_dir = os.path.join(comfyui_path, "models")
+            
+            if not os.path.exists(models_dir):
+                print(f"Error: Models directory not found at {models_dir}")
+                sys.exit(1)
+            
+            print(f"Models in {models_dir}:")
+            found = False
+            total_size = 0
+            for root, dirs, files in os.walk(models_dir):
+                for file in files:
+                    if file.startswith('.') or file.endswith('.txt') or file.endswith('.md'):
+                        continue
+                    found = True
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, models_dir)
+                    size = os.path.getsize(file_path)
+                    total_size += size
+                    size_str = format_size(size)
+                    print(f"  - [{size_str:>10}] {rel_path}")
+            
+            if not found:
+                print("  (No models found)")
+            else:
+                print(f"\nTotal size: {format_size(total_size)}")
             return
 
     # If not a subcommand, use the original parser logic for sources
@@ -232,7 +283,7 @@ def main():
         model_source_path = resolve_model_source(args.model_source)
         if not model_source_path:
             print(f"Error: Model source '{args.model_source}' not found.")
-            print("Try 'comfydl list' to see available sources.")
+            print("Try 'comfydl sources' to see available sources.")
             sys.exit(1)
         
         process_download(model_source_path, comfyui_path, downloader)

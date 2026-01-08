@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfydl"
-version = "0.1.2"
+version = "0.1.3"
 authors = [{ name = "ShinChven", email = "shinchven@gmail.com" }]
 description = "A robust CLI tool for downloading models for ComfyUI"
 readme = "README.md"
