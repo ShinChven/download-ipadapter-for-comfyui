@@ -3,6 +3,7 @@ lib/
 .vscode/
 models/
 comfy-org-docs/
+GEMINI.md
 
 test/config.json
 

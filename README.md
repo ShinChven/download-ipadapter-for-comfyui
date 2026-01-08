@@ -77,6 +77,9 @@ comfydl set CIVITAI_TOKEN your_api_token
 
 # (Optional) Set Hugging Face Token (for private/gated models)
 comfydl set HF_TOKEN your_hf_token
+
+# (Optional) Set Custom Model Sources Path
+comfydl set MODEL_SOURCES_PATH /path/to/your/custom/sources
 ```
 
 *These settings are persisted locally in `~/.comfydl_config`.*
@@ -127,10 +130,11 @@ comfydl civitai 12345 /path/to/ComfyUI
 `comfydl` resolves model source names (e.g., `flux`) by checking locations in the following order:
 
 1.  **Exact File Path**: If you provide a path to a YAML file, it is used directly.
-2.  **User Global Storage**: Checks `~/.comfydl/model_sources/<name>.yaml`.
+2.  **Custom Model Sources Path**: Checks the directory configured via `comfydl set MODEL_SOURCES_PATH <path>`.
+3.  **User Global Storage**: Checks `~/.comfydl/model_sources/<name>.yaml`.
     *   Use this to override built-in sources or add personal collections available globally.
-3.  **Built-in Sources**: Checks the `model_sources` directory bundled with the installed `comfydl` package.
-4.  **Local Project Storage**: Checks `model_sources/<name>.yaml` in your current working directory.
+4.  **Built-in Sources**: Checks the `model_sources` directory bundled with the installed `comfydl` package.
+5.  **Local Project Storage**: Checks `model_sources/<name>.yaml` in your current working directory.
 
 ### Custom Model Sources
 

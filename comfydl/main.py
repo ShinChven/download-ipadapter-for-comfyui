@@ -18,7 +18,7 @@ def format_size(size_bytes):
     return f"{s} {size_name[i]}"
 
 def handle_set(key, value):
-    valid_keys = ["COMFYUI_ROOT", "CIVITAI_TOKEN", "HF_TOKEN"]
+    valid_keys = ["COMFYUI_ROOT", "CIVITAI_TOKEN", "HF_TOKEN", "MODEL_SOURCES_PATH"]
     if key not in valid_keys:
         print(f"Warning: '{key}' is not a standard configuration key. Valid keys: {valid_keys}")
     set_config_value(key, value)
@@ -27,6 +27,18 @@ def resolve_model_source(source_name):
     # Check if exact path
     if os.path.exists(source_name):
         return source_name
+
+    # Check custom model sources path
+    custom_sources_path = get_config_value("MODEL_SOURCES_PATH")
+    if custom_sources_path and os.path.exists(custom_sources_path):
+        custom_sources = Path(custom_sources_path)
+        candidate = custom_sources / f"{source_name}.yaml"
+        if candidate.exists():
+            return str(candidate)
+
+        candidate = custom_sources / source_name
+        if candidate.exists():
+            return str(candidate)
 
     # Check user home override directory (~/.comfydl/model_sources)
     user_sources = Path.home() / ".comfydl" / "model_sources"
@@ -74,6 +86,12 @@ def resolve_model_source(source_name):
 def get_available_sources():
     sources = set()
     
+    # Check custom model sources path
+    custom_sources_path = get_config_value("MODEL_SOURCES_PATH")
+    if custom_sources_path and os.path.exists(custom_sources_path):
+        for f in Path(custom_sources_path).glob("*.yaml"):
+            sources.add(f.stem)
+
     # Check user home sources
     user_sources = Path.home() / ".comfydl" / "model_sources"
     if user_sources.exists():
