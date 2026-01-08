@@ -5,7 +5,7 @@ import yaml
 import math
 from pathlib import Path
 from .config import set_config_value, get_config_value
-from .utils import check_downloader, download_file
+from .utils import check_downloader, download_file, get_remote_file_size
 import questionary
 
 def format_size(size_bytes):
@@ -119,6 +119,90 @@ def get_available_sources():
             
     return sorted(list(sources))
 
+def get_downloads_status(downloads, comfyui_path, fetch_remote_size=False):
+    """
+    Check the status of download items.
+    Returns a list of (dest, is_installed, local_size, remote_size).
+    """
+    items_status = []
+    for item in downloads:
+        url = item.get('url')
+        dest = item.get('dest')
+        if not dest:
+            continue
+        
+        full_path = os.path.join(comfyui_path, dest)
+        is_installed = os.path.exists(full_path) and os.path.isfile(full_path)
+        
+        local_size = os.path.getsize(full_path) if is_installed else 0
+        remote_size = None
+        
+        if not is_installed and fetch_remote_size and url:
+            remote_size = get_remote_file_size(url)
+            
+        items_status.append({
+            'dest': dest,
+            'is_installed': is_installed,
+            'local_size': local_size,
+            'remote_size': remote_size,
+            'url': url
+        })
+    return items_status
+
+def print_source_tree(source_name, items_status, indent=""):
+    """
+    Print a formatted file tree for a model source.
+    """
+    installed_count = sum(1 for item in items_status if item['is_installed'])
+    total_count = len(items_status)
+    total_local_size = sum(item['local_size'] for item in items_status)
+    
+    # Calculate padding for alignment
+    max_label_len = 0
+    if total_count == 1:
+        max_label_len = len(source_name)
+    else:
+        max_label_len = len(source_name)
+        for item in items_status:
+            name = os.path.basename(item['dest'])
+            # 4 spaces for "  └── " or "  ├── "
+            max_label_len = max(max_label_len, len(name) + 4)
+    
+    # Cap padding to avoid excessive width on very long filenames
+    padding = min(max_label_len, 60)
+    
+    if total_count == 1:
+        item = items_status[0]
+        status_symbol = "✓" if item['is_installed'] else " "
+        size_str = ""
+        if item['is_installed']:
+            size_str = f" [{format_size(item['local_size']):>10}]"
+        elif item['remote_size']:
+            size_str = f" [{format_size(item['remote_size']):>10}] (remote)"
+            
+        label = f"[{status_symbol}] {source_name}"
+        print(f"{indent}{label:<{padding + 4}}{size_str}")
+    else:
+        status_symbol = "✓" if installed_count == total_count else ("!" if installed_count > 0 else " ")
+        total_size_str = f" [{format_size(total_local_size):>10}]" if total_local_size > 0 else ""
+        
+        label = f"[{status_symbol}] {source_name}"
+        print(f"{indent}{label:<{padding + 4}} ({installed_count}/{total_count}){total_size_str}")
+        
+        for i, item in enumerate(items_status):
+            connector = "└──" if i == len(items_status) - 1 else "├──"
+            item_symbol = "✓" if item['is_installed'] else " "
+            
+            size_str = ""
+            if item['is_installed']:
+                size_str = f" [{format_size(item['local_size']):>10}]"
+            elif item['remote_size']:
+                size_str = f" [{format_size(item['remote_size']):>10}] (remote)"
+            
+            name = os.path.basename(item['dest'])
+            child_label = f" {connector} [{item_symbol}] {name}"
+            print(f"{indent}  {child_label:<{padding + 2}}{size_str}")
+
 def process_download(model_source_path, comfyui_path, downloader=None):
     if not downloader:
         downloader = check_downloader()
@@ -126,9 +210,6 @@ def process_download(model_source_path, comfyui_path, downloader=None):
             print("Error: Neither aria2c nor wget found. Please install one of them.")
             return False
             
-    print(f"Using ComfyUI path: {comfyui_path}")
-    print(f"\nProcessing: {os.path.basename(model_source_path)}")
-    
     try:
         with open(model_source_path, 'r') as f:
             config_data = yaml.safe_load(f)
@@ -150,16 +231,32 @@ def process_download(model_source_path, comfyui_path, downloader=None):
         print(f"Warning: No downloads found in {model_source_path}")
         return True
 
-    for item in downloads:
-        url = item.get('url')
-        dest = item.get('dest')
-        
-        if not url or not dest:
-            print(f"Skipping invalid item: {item}")
+    source_name = os.path.basename(model_source_path)
+    if source_name.endswith('.yaml'):
+        source_name = source_name[:-5]
+
+    print(f"\nSource: {source_name}")
+    print(f"ComfyUI Path: {comfyui_path}")
+    
+    # Show status tree before downloading
+    print("\nFile status:")
+    items_status = get_downloads_status(downloads, comfyui_path, fetch_remote_size=True)
+    print_source_tree(source_name, items_status, indent="  ")
+    print()
+
+    # If all items are installed, we can skip or confirm
+    all_installed = all(item['is_installed'] for item in items_status)
+    if all_installed:
+        print("All files are already installed.")
+        return True
+
+    for item in items_status:
+        if item['is_installed']:
+            # print(f"Skipping existing file: {os.path.basename(item['dest'])}")
             continue
             
-        full_dest = os.path.join(comfyui_path, dest)
-        download_file(url, full_dest, downloader)
+        full_dest = os.path.join(comfyui_path, item['dest'])
+        download_file(item['url'], full_dest, downloader)
     return True
 
 def handle_rm(model_sources, comfyui_path, force=False, dry_run=False):
@@ -280,40 +377,13 @@ def list_sources_status(comfyui_path):
         if not downloads:
             continue
 
-        items_status = []
-        source_total_size = 0
-        for item in downloads:
-            dest = item.get('dest')
-            if not dest:
-                continue
-            full_path = os.path.join(comfyui_path, dest)
-            is_installed = os.path.exists(full_path) and os.path.isfile(full_path)
-            size = 0
-            if is_installed:
-                size = os.path.getsize(full_path)
-                source_total_size += size
-            items_status.append((dest, is_installed, size))
-            
-        installed_count = sum(1 for _, is_installed, _ in items_status if is_installed)
-        total_count = len(items_status)
+        items_status = get_downloads_status(downloads, comfyui_path)
         
+        installed_count = sum(1 for item in items_status if item['is_installed'])
         if installed_count == 0:
             continue
 
-        if total_count == 1:
-            dest, is_installed, size = items_status[0]
-            status_symbol = "✓" if is_installed else " "
-            size_str = f" [{format_size(size):>10}]" if is_installed else ""
-            print(f"  [{status_symbol}] {source_name:<60}{size_str}")
-        else:
-            status_symbol = "✓" if installed_count == total_count else ("!" if installed_count > 0 else " ")
-            total_size_str = f" [{format_size(source_total_size):>10}]"
-            print(f"  [{status_symbol}] {source_name:<60} ({installed_count}/{total_count}){total_size_str}")
-            for i, (dest, is_installed, size) in enumerate(items_status):
-                connector = "└──" if i == len(items_status) - 1 else "├──"
-                item_symbol = "✓" if is_installed else " "
-                size_str = f" [{format_size(size):>10}]" if is_installed else ""
-                print(f"    {connector} [{item_symbol}] {os.path.basename(dest):<60}{size_str}")
+        print_source_tree(source_name, items_status, indent="  ")
 
 def main():
     parser = argparse.ArgumentParser(description="ComfyDL: ComfyUI Model Downloader")

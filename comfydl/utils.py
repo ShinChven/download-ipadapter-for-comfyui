@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import sys
+import requests
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from .config import get_config_value
 
@@ -82,3 +83,35 @@ def download_file(url, filepath, downloader):
         print(f"Error downloading {filename}.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+def get_remote_file_size(url):
+    """
+    Get the remote file size using an HTTP HEAD request.
+    Returns size in bytes if successful, otherwise None.
+    """
+    final_url = append_civitai_token(url)
+    headers = {}
+    
+    if "huggingface.co" in final_url:
+        hf_token = get_config_value("HF_TOKEN")
+        if hf_token:
+            headers["Authorization"] = f"Bearer {hf_token}"
+            
+    try:
+        # Use allow_redirects=True because HEAD on some CDNs might redirect
+        response = requests.head(final_url, headers=headers, allow_redirects=True, timeout=5)
+        if response.status_code == 200:
+            content_length = response.headers.get("Content-Length")
+            if content_length:
+                return int(content_length)
+        
+        # Fallback to GET with stream=True if HEAD fails or doesn't provide Content-Length
+        response = requests.get(final_url, headers=headers, stream=True, allow_redirects=True, timeout=5)
+        if response.status_code == 200:
+            content_length = response.headers.get("Content-Length")
+            if content_length:
+                return int(content_length)
+    except Exception:
+        pass
+    
+    return None
