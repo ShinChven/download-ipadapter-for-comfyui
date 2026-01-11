@@ -404,6 +404,160 @@ def list_sources_status(comfyui_path):
 
         print_source_tree(source_name, items_status, indent="  ")
 
+
+def search_url_in_sources(url):
+    """
+    Search for a URL in all available model sources to find a suggested destination.
+    Returns the folder path (dirname of dest) if found, else None.
+    """
+    sources = get_available_sources()
+    for source in sources:
+        path = resolve_model_source(source)
+        if not path:
+            continue
+            
+        try:
+            with open(path, 'r') as f:
+                data = yaml.safe_load(f)
+        except Exception:
+            continue
+            
+        downloads = []
+        if isinstance(data, list):
+            downloads = data
+        elif isinstance(data, dict):
+            downloads = data.get('downloads', [])
+            
+        for item in downloads:
+            if item.get('url') == url:
+                dest = item.get('dest')
+                if dest:
+                    return os.path.dirname(dest)
+    return None
+
+def get_common_folders(comfyui_path):
+    """
+    Get a list of common model folders in ComfyUI path.
+    Returns only folder names inside 'models' directory.
+    """
+    common = [
+        "checkpoints",
+        "loras",
+        "vae",
+        "controlnet",
+        "upscale_models",
+        "embeddings",
+        "ipadapter",
+        "clip",
+        "unet",
+        "vae_approx",
+        "photomaker",
+    ]
+    
+    # Also scan for any other directories in models/
+    models_root = os.path.join(comfyui_path, "models")
+    if os.path.exists(models_root):
+        try:
+            for item in os.listdir(models_root):
+                path = os.path.join(models_root, item)
+                if os.path.isdir(path):
+                    if item not in common and not item.startswith("."):
+                        common.append(item)
+        except Exception:
+            pass
+            
+    return sorted(common)
+
+def handle_url_download(url, comfyui_path, target_dir=None, skip_prompt=False, downloader=None):
+    from urllib.parse import urlparse, unquote
+    
+    if not downloader:
+        downloader = check_downloader()
+        if not downloader:
+             print("Error: Neither aria2c nor wget found. Please install one of them.")
+             return
+
+    # Extract filename
+    parsed = urlparse(url)
+    filename = os.path.basename(parsed.path)
+    filename = unquote(filename)
+    
+    if not filename:
+        # Try to guess from content-disposition? 
+        # For now, if no filename in URL, ask user or fail.
+        # But most safetensors URLs have filename.
+        print("Error: Could not determine filename from URL.")
+        return
+
+    # Determine target directory
+    if not target_dir:
+        # Search for suggestion
+        suggested = search_url_in_sources(url)
+        
+        # If suggested is like "models/checkpoints", strip "models/"
+        # We assume the default standard is inside models/
+        if suggested and suggested.startswith("models/"):
+            suggested = suggested[7:]
+            
+        choices = get_common_folders(comfyui_path)
+        
+        default_choice = None
+        if suggested:
+            if suggested not in choices:
+                choices.append(suggested)
+                choices.sort()
+            default_choice = suggested
+            
+        # Interactive selection
+        q = questionary.select(
+            "Select destination folder:",
+            choices=choices,
+            default=default_choice if default_choice else None
+        )
+        selected_folder = q.ask()
+        
+        if not selected_folder:
+            print("No folder selected. Aborting.")
+            return
+            
+        # Construct path relative to ComfyUI/models
+        # BUT wait, the user might have selected something that we extracted from 'models/' root
+        # So we prepend 'models/'
+        target_dir = os.path.join("models", selected_folder)
+    
+    # Construct full path
+    full_dest_path = os.path.join(comfyui_path, target_dir, filename)
+    
+    # Check remote size and disk space
+    print(f"\nTarget: {os.path.relpath(full_dest_path, comfyui_path)}")
+    
+    remote_size = get_remote_file_size(url)
+    has_space = True
+    free_space = 0
+    
+    if remote_size:
+        has_space, free_space = check_disk_space(comfyui_path, remote_size)
+        print(f"Download size: {format_size(remote_size)}")
+        print(f"Free disk space: {format_size(free_space)}")
+    else:
+        print("Remote size: Unknown")
+        # Check free space anyway just to show
+        from .utils import get_free_disk_space
+        free_space = get_free_disk_space(comfyui_path)
+        print(f"Free disk space: {format_size(free_space)}")
+
+    if not has_space:
+        print("Warning: Not enough disk space!")
+        if not skip_prompt:
+             if not questionary.confirm("Warning: Not enough disk space. Proceed anyway?").ask():
+                 return
+
+    if not skip_prompt:
+         if not questionary.confirm("Do you want to proceed with the download?").ask():
+             print("Aborted.")
+             return
+
+    download_file(url, full_dest_path, downloader)
 def main():
     parser = argparse.ArgumentParser(description="ComfyDL: ComfyUI Model Downloader\nhttps://github.com/ShinChven/comfydl")
     subparsers = parser.add_subparsers(dest="command")
@@ -548,6 +702,7 @@ def main():
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("model_source", nargs="?", help="Model source name (e.g. 'flux') or path to YAML config")
     parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
+    parser.add_argument("-d", "--directory", help="Target directory relative to ComfyUI root (e.g. models/checkpoints)")
     parser.add_argument("-y", "--yes", action="store_true", help="Skip confirmation prompt")
     
     args = parser.parse_args()
@@ -580,13 +735,16 @@ def main():
     print(f"Using downloader: {downloader}")
 
     if args.model_source:
-        model_source_path = resolve_model_source(args.model_source)
-        if not model_source_path:
-            print(f"Error: Model source '{args.model_source}' not found.")
-            print("Try 'comfydl sources' to see available sources.")
-            sys.exit(1)
-        
-        process_download(model_source_path, comfyui_path, downloader, skip_prompt=args.yes)
+        if args.model_source.startswith("http://") or args.model_source.startswith("https://"):
+            handle_url_download(args.model_source, comfyui_path, target_dir=args.directory, skip_prompt=args.yes, downloader=downloader)
+        else:
+            model_source_path = resolve_model_source(args.model_source)
+            if not model_source_path:
+                print(f"Error: Model source '{args.model_source}' not found.")
+                print("Try 'comfydl sources' to see available sources.")
+                sys.exit(1)
+            
+            process_download(model_source_path, comfyui_path, downloader, skip_prompt=args.yes)
     else:
         # Interactive mode
         sources = get_available_sources()
