@@ -28,6 +28,7 @@ comfydl "urn:air:flux1:checkpoint:civitai:618692@691639" # By AIR URN
 -   **Smart Removal**: Safely uninstall models by source name using the `rm` command, including dry-run and interative modes.
 -   **Civitai Integration**: Quick download via Model ID, Version ID, URLs, or **AIR URNs** (`urn:air:...@version`).
 -   **Model Registries**: Subscribe to remote JSON registries for dynamic model source updates.
+-   **Safety Confirmations**: Prompts for confirmation before significant actions (downloads, deletions) and warns about low disk space.
 -   **Resumable**: Uses `aria2c` (recommended) or `wget` for reliable, resumable downloads.
 -   **Configurable**: Set your ComfyUI root path and API tokens once, and they are remembered.
 
@@ -213,10 +214,8 @@ Registries are cached locally in `~/.comfydl/registries/`.
 
 1.  **Exact File Path**: If you provide a path to a YAML file, it is used directly.
 2.  **Custom Model Sources Path**: Checks the directory configured via `comfydl set MODEL_SOURCES_PATH <path>`.
-3.  **User Global Storage**: Checks `~/.comfydl/model_sources/<name>.yaml`.
-4.  **Local Project Storage**: Checks `model_sources/<name>.yaml` in your current working directory.
-5.  **Registries**: Checks cached sources from subscribed registries (including default).
-6.  **Built-in Sources**: Checks the bundled `model_sources` directory (legacy).
+3.  **Registries**: Checks cached sources from subscribed registries (including default).
+4.  **Built-in Sources**: Checks the bundled `model_sources` directory (legacy).
 
 ### Custom Model Sources
 

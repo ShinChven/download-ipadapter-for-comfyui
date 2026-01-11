@@ -5,7 +5,7 @@ import yaml
 import math
 from pathlib import Path
 from .config import set_config_value, get_config_value
-from .utils import check_downloader, download_file, get_remote_file_size, format_size, check_disk_space
+from .utils import check_downloader, download_file, get_remote_file_size, format_size, check_disk_space, user_confirm
 import questionary
 from . import __version__
 from .registry import init_registries, update_registry, load_registry_sources, resolve_registry_source, add_registry, remove_registry, get_registries
@@ -36,34 +36,11 @@ def resolve_model_source(source_name):
         if candidate.exists():
             return str(candidate)
 
-    # Check user home override directory (~/.comfydl/model_sources)
-    user_sources = Path.home() / ".comfydl" / "model_sources"
-    if user_sources.exists():
-        candidate = user_sources / f"{source_name}.yaml"
-        if candidate.exists():
-            return str(candidate)
 
-        candidate = user_sources / source_name
-        if candidate.exists():
-            return str(candidate)
     
 
             
-    # Check in subdirectory of current working directory (comfydl/model_sources)
-    local_dev_sources = Path("comfydl/model_sources")
-    if local_dev_sources.exists():
-        candidate = local_dev_sources / f"{source_name}.yaml"
-        if candidate.exists():
-            return str(candidate)
-        
-        candidate = local_dev_sources / source_name
-        if candidate.exists():
-            return str(candidate)
-    cwd_sources = Path("model_sources")
-    if cwd_sources.exists():
-         candidate = cwd_sources / f"{source_name}.yaml"
-         if candidate.exists():
-             return str(candidate)
+
              
     # Maybe package provided sources? For now we assume local execution context
     return None
@@ -100,25 +77,11 @@ def get_available_sources():
         for f in Path(custom_sources_path).glob("*.yaml"):
             sources.add(f.stem)
 
-    # Check user home sources
-    user_sources = Path.home() / ".comfydl" / "model_sources"
-    if user_sources.exists():
-        for f in user_sources.glob("*.yaml"):
-            sources.add(f.stem)
+
 
 
     
-    # Check local development
-    local_dev_sources = Path("comfydl/model_sources")
-    if local_dev_sources.exists():
-        for f in local_dev_sources.glob("*.yaml"):
-            sources.add(f.stem)
 
-    # Check local 'model_sources' directory
-    cwd_sources = Path("model_sources")
-    if cwd_sources.exists():
-        for f in cwd_sources.glob("*.yaml"):
-            sources.add(f.stem)
             
     # Add registry sources
     init_registries()
@@ -271,11 +234,11 @@ def process_download(source_name, comfyui_path, downloader=None, skip_prompt=Fal
         if not has_space:
             print("Warning: Not enough disk space!")
             if not skip_prompt:
-                 if not questionary.confirm("Warning: Not enough disk space. Proceed anyway?").ask():
+                 if not user_confirm("Warning: Not enough disk space. Proceed anyway?"):
                      return False
         
         if not skip_prompt:
-            if not questionary.confirm("Do you want to proceed with the download?").ask():
+            if not user_confirm("Do you want to proceed with the download?"):
                 print("Aborted.")
                 return False
 
@@ -361,7 +324,7 @@ def handle_rm(model_sources, comfyui_path, force=False, dry_run=False):
             continue
             
         if not force:
-            confirmed = questionary.confirm(f"Are you sure you want to delete these {len(files_to_delete)} files?").ask()
+            confirmed = user_confirm(f"Are you sure you want to delete these {len(files_to_delete)} files?")
             if not confirmed:
                 print("Skipped.")
                 continue
@@ -547,11 +510,11 @@ def handle_url_download(url, comfyui_path, target_dir=None, skip_prompt=False, d
     if not has_space:
         print("Warning: Not enough disk space!")
         if not skip_prompt:
-             if not questionary.confirm("Warning: Not enough disk space. Proceed anyway?").ask():
+             if not user_confirm("Warning: Not enough disk space. Proceed anyway?"):
                  return
 
     if not skip_prompt:
-         if not questionary.confirm("Do you want to proceed with the download?").ask():
+         if not user_confirm("Do you want to proceed with the download?"):
              print("Aborted.")
              return
 

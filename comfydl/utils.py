@@ -6,6 +6,25 @@ import math
 import requests
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from .config import get_config_value
+import questionary
+
+def user_confirm(message, default=True):
+    """
+    Ask for confirmation, requiring Enter key.
+    Returns True for 'y', 'Y', or empty input (if default=True).
+    """
+    default_str = "Y/n" if default else "y/N"
+    response = questionary.text(f"{message} [{default_str}]").ask()
+    
+    if response is None:
+        return False
+        
+    response = response.strip().lower()
+    if not response:
+        return default
+        
+    return response.startswith('y')
+
 
 def format_size(size_bytes):
     if size_bytes == 0:

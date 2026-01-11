@@ -2,7 +2,7 @@ import os
 import requests
 import sys
 from .config import get_config_value
-from .utils import download_file, check_downloader, format_size, check_disk_space, get_remote_file_size
+from .utils import download_file, check_downloader, format_size, check_disk_space, get_remote_file_size, user_confirm
 import questionary
 
 def get_safe_headers():
@@ -158,11 +158,11 @@ def process_civitai_download(input_str, comfyui_root, downloader=None, skip_prom
         if not has_space:
             print("Warning: Not enough disk space!")
             if not skip_prompt:
-                 if not questionary.confirm("Warning: Not enough disk space. Proceed anyway?").ask():
+                 if not user_confirm("Warning: Not enough disk space. Proceed anyway?"):
                      return False
 
         if not skip_prompt:
-            if not questionary.confirm(f"Do you want to download '{model_name}'?").ask():
+            if not user_confirm(f"Do you want to download '{model_name}'?"):
                 print("Aborted.")
                 return False
 
