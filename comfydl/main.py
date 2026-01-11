@@ -5,19 +5,12 @@ import yaml
 import math
 from pathlib import Path
 from .config import set_config_value, get_config_value
-from .utils import check_downloader, download_file, get_remote_file_size
+from .utils import check_downloader, download_file, get_remote_file_size, format_size, check_disk_space
 import questionary
 from . import __version__
 
 
-def format_size(size_bytes):
-    if size_bytes == 0:
-        return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return f"{s} {size_name[i]}"
+
 
 def handle_set(key, value):
     valid_keys = ["COMFYUI_ROOT", "CIVITAI_TOKEN", "HF_TOKEN", "MODEL_SOURCES_PATH"]
@@ -205,7 +198,7 @@ def print_source_tree(source_name, items_status, indent=""):
             child_label = f" {connector} [{item_symbol}] {name}"
             print(f"{indent}  {child_label:<{padding + 2}}{size_str}")
 
-def process_download(model_source_path, comfyui_path, downloader=None):
+def process_download(model_source_path, comfyui_path, downloader=None, skip_prompt=False):
     if not downloader:
         downloader = check_downloader()
         if not downloader:
@@ -251,6 +244,30 @@ def process_download(model_source_path, comfyui_path, downloader=None):
     if all_installed:
         print("All files are already installed.")
         return True
+
+    # Calculate total download size
+    total_download_size = 0
+    for item in items_status:
+        if not item['is_installed'] and item['remote_size']:
+            total_download_size += item['remote_size']
+
+    # Check disk space
+    has_space, free_space = check_disk_space(comfyui_path, total_download_size)
+    
+    if total_download_size > 0:
+        print(f"Total download size: {format_size(total_download_size)}")
+        print(f"Free disk space: {format_size(free_space)}")
+        
+        if not has_space:
+            print("Warning: Not enough disk space!")
+            if not skip_prompt:
+                 if not questionary.confirm("Warning: Not enough disk space. Proceed anyway?").ask():
+                     return False
+        
+        if not skip_prompt:
+            if not questionary.confirm("Do you want to proceed with the download?").ask():
+                print("Aborted.")
+                return False
 
     for item in items_status:
         if item['is_installed']:
@@ -400,6 +417,7 @@ def main():
     civitai_parser = subparsers.add_parser("civitai", help="Download model from Civitai by Model Version ID, URL, or AIR URN")
     civitai_parser.add_argument("version_id", help="Civitai Model Version ID (integer), Download URL, or AIR URN")
     civitai_parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
+    civitai_parser.add_argument("-y", "--yes", action="store_true", help="Skip confirmation prompt")
 
     # Sources command
     sources_parser = subparsers.add_parser("sources", help="List available model sources")
@@ -446,7 +464,7 @@ def main():
             if not os.path.exists(os.path.join(comfyui_path, "main.py")):
                 print(f"Warning: '{comfyui_path}' does not look like a ComfyUI directory (main.py missing).")
 
-            process_civitai_download(args.version_id, comfyui_path)
+            process_civitai_download(args.version_id, comfyui_path, skip_prompt=args.yes)
             return
         elif sys.argv[1] == "sources":
             args, _ = parser.parse_known_args()
@@ -530,6 +548,7 @@ def main():
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("model_source", nargs="?", help="Model source name (e.g. 'flux') or path to YAML config")
     parser.add_argument("comfyui_path", nargs="?", help="ComfyUI root directory override")
+    parser.add_argument("-y", "--yes", action="store_true", help="Skip confirmation prompt")
     
     args = parser.parse_args()
     
@@ -567,7 +586,7 @@ def main():
             print("Try 'comfydl sources' to see available sources.")
             sys.exit(1)
         
-        process_download(model_source_path, comfyui_path, downloader)
+        process_download(model_source_path, comfyui_path, downloader, skip_prompt=args.yes)
     else:
         # Interactive mode
         sources = get_available_sources()
@@ -587,7 +606,7 @@ def main():
         for source_name in selected:
              model_source_path = resolve_model_source(source_name)
              if model_source_path:
-                 process_download(model_source_path, comfyui_path, downloader)
+                 process_download(model_source_path, comfyui_path, downloader, skip_prompt=args.yes)
 
 if __name__ == "__main__":
     main()

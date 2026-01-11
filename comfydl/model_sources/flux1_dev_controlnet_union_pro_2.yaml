@@ -1,0 +1,5 @@
+description: "FLUX.1-dev ControlNet Union Pro 2.0 - Unified ControlNet for FLUX.1-dev (Standard BF16)"
+source: "https://huggingface.co/Shakker-Labs/FLUX.1-dev-ControlNet-Union-Pro-2.0"
+downloads:
+  - url: "https://huggingface.co/Shakker-Labs/FLUX.1-dev-ControlNet-Union-Pro-2.0/resolve/main/diffusion_pytorch_model.safetensors"
+    dest: "models/controlnet/flux_union_pro_2_0.safetensors"

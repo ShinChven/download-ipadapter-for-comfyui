@@ -2,9 +2,45 @@ import os
 import shutil
 import subprocess
 import sys
+import math
 import requests
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from .config import get_config_value
+
+def format_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return f"{s} {size_name[i]}"
+
+def get_free_disk_space(path):
+    """
+    Returns the free disk space in bytes for the drive containing path.
+    """
+    try:
+        # if path doesn't exist, check parent
+        while not os.path.exists(path):
+            parent = os.path.dirname(path)
+            if parent == path: # root
+                break
+            path = parent
+            
+        usage = shutil.disk_usage(path)
+        return usage.free
+    except Exception as e:
+        print(f"Warning: Could not check disk space: {e}")
+        return float('inf')
+
+def check_disk_space(path, required_bytes):
+    """
+    Checks if there is enough disk space.
+    Returns (has_enough_space, free_bytes)
+    """
+    free_bytes = get_free_disk_space(path)
+    return free_bytes >= required_bytes, free_bytes
 
 def append_civitai_token(url):
     if "civitai.com" not in url:

@@ -2,7 +2,8 @@ import os
 import requests
 import sys
 from .config import get_config_value
-from .utils import download_file, check_downloader
+from .utils import download_file, check_downloader, format_size, check_disk_space, get_remote_file_size
+import questionary
 
 def get_safe_headers():
     token = get_config_value("CIVITAI_TOKEN")
@@ -83,7 +84,7 @@ def extract_version_id(input_str):
         
     return None
 
-def process_civitai_download(input_str, comfyui_root, downloader=None):
+def process_civitai_download(input_str, comfyui_root, downloader=None, skip_prompt=False):
     version_id = extract_version_id(input_str)
     
     if not version_id:
@@ -138,5 +139,33 @@ def process_civitai_download(input_str, comfyui_root, downloader=None):
     
     print(f"Target: {subfolder}/{file_name}")
     
+    # Get size
+    size_kb = target_file.get("sizeKB")
+    size_bytes = 0
+    if size_kb:
+        size_bytes = int(size_kb * 1024)
+    else:
+        # Fallback to remote fetch
+        print("Fetching remote file size...")
+        size_bytes = get_remote_file_size(download_url) or 0
+        
+    # Check disk space
+    has_space, free_space = check_disk_space(comfyui_root, size_bytes)
+    
+    if size_bytes > 0:
+        print(f"File size: {format_size(size_bytes)}")
+        print(f"Free disk space: {format_size(free_space)}")
+        
+        if not has_space:
+            print("Warning: Not enough disk space!")
+            if not skip_prompt:
+                 if not questionary.confirm("Warning: Not enough disk space. Proceed anyway?").ask():
+                     return False
+
+        if not skip_prompt:
+            if not questionary.confirm(f"Do you want to download '{model_name}'?").ask():
+                print("Aborted.")
+                return False
+
     download_file(download_url, dest_path, downloader)
     return True
