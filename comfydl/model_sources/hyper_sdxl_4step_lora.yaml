@@ -1,5 +1,0 @@
-description: "Hyper-SD SDXL LoRA (4-step)"
-source: "https://huggingface.co/ByteDance/Hyper-SD"
-downloads:
-  - url: "https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SDXL-4steps-lora.safetensors"
-    dest: "models/loras/Hyper-SDXL-4steps-lora.safetensors"

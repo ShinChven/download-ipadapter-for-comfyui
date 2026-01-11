@@ -27,6 +27,7 @@ comfydl "urn:air:flux1:checkpoint:civitai:618692@691639" # By AIR URN
 -   **Installation Status & Audit**: Use `sources --installed` to see exactly what's installed, including file sizes and partial installation status.
 -   **Smart Removal**: Safely uninstall models by source name using the `rm` command, including dry-run and interative modes.
 -   **Civitai Integration**: Quick download via Model ID, Version ID, URLs, or **AIR URNs** (`urn:air:...@version`).
+-   **Model Registries**: Subscribe to remote JSON registries for dynamic model source updates.
 -   **Resumable**: Uses `aria2c` (recommended) or `wget` for reliable, resumable downloads.
 -   **Configurable**: Set your ComfyUI root path and API tokens once, and they are remembered.
 
@@ -186,6 +187,26 @@ comfydl civitai 12345 /path/to/ComfyUI
 
 *Note: If you have configured `CIVITAI_TOKEN`, it will be automatically appended to the request to support downloading restricted or early-access models.*
 
+### Model Registries
+
+ComfyDL supports subscribing to remote registries (JSON files) to keep your model sources dynamic and up-to-date. The default registry is automatically configured.
+
+```bash
+# List configured registries
+comfydl registry list
+
+# Add a new registry
+comfydl registry add https://example.com/my-sources.json --name specific_repo
+
+# Update local cache of registries (fetches latest changes)
+comfydl registry update
+
+# Remove a registry
+comfydl registry delete https://example.com/my-sources.json
+```
+
+Registries are cached locally in `~/.comfydl/registries/`.
+
 ### Model Sources & Resolution
 
 `comfydl` resolves model source names (e.g., `flux`) by checking locations in the following order:
@@ -193,9 +214,9 @@ comfydl civitai 12345 /path/to/ComfyUI
 1.  **Exact File Path**: If you provide a path to a YAML file, it is used directly.
 2.  **Custom Model Sources Path**: Checks the directory configured via `comfydl set MODEL_SOURCES_PATH <path>`.
 3.  **User Global Storage**: Checks `~/.comfydl/model_sources/<name>.yaml`.
-    *   Use this to override built-in sources or add personal collections available globally.
-4.  **Built-in Sources**: Checks the `model_sources` directory bundled with the installed `comfydl` package.
-5.  **Local Project Storage**: Checks `model_sources/<name>.yaml` in your current working directory.
+4.  **Local Project Storage**: Checks `model_sources/<name>.yaml` in your current working directory.
+5.  **Registries**: Checks cached sources from subscribed registries (including default).
+6.  **Built-in Sources**: Checks the bundled `model_sources` directory (legacy).
 
 ### Custom Model Sources
 
@@ -217,10 +238,6 @@ downloads:
 ### Adding New Default Sources
 
 If you are a maintainer or contributor wishing to add new built-in model sources to the package, please refer to [MODEL_SOURCE.md](MODEL_SOURCE.md).
-
-## Legacy Scripts
-
-The original shell scripts (e.g., `download-ipadapters.sh`) are still present in the repository for reference but `comfydl` is the recommended way to download models.
 
 ## License
 

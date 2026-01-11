@@ -1,5 +1,0 @@
-description: "SDXL ReVision"
-source: "https://huggingface.co/comfyanonymous/clip_vision_g"
-downloads:
-  - url: "https://huggingface.co/comfyanonymous/clip_vision_g/resolve/main/clip_vision_g.safetensors"
-    dest: "models/clip_vision/clip_vision_g.safetensors"

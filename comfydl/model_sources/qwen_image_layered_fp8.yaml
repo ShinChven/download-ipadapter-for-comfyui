@@ -1,9 +1,0 @@
-description: "Qwen Image Layered Model (FP8)"
-source: "https://docs.comfy.org/tutorials/image/qwen/qwen-image-layered"
-downloads:
-  - url: "https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
-    dest: "models/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Qwen-Image-Layered_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_layered_fp8mixed.safetensors"
-    dest: "models/diffusion_models/qwen_image_layered_fp8mixed.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Qwen-Image-Layered_ComfyUI/resolve/main/split_files/vae/qwen_image_layered_vae.safetensors"
-    dest: "models/vae/qwen_image_layered_vae.safetensors"

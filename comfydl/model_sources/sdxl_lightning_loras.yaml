@@ -1,9 +1,0 @@
-description: "Stable Diffusion XL Lightning (All LoRAs: 2, 4, 8 steps)"
-source: "https://huggingface.co/ByteDance/SDXL-Lightning"
-downloads:
-  - url: "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_2step_lora.safetensors"
-    dest: "models/loras/sdxl_lightning_2step_lora.safetensors"
-  - url: "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_4step_lora.safetensors"
-    dest: "models/loras/sdxl_lightning_4step_lora.safetensors"
-  - url: "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_8step_lora.safetensors"
-    dest: "models/loras/sdxl_lightning_8step_lora.safetensors"

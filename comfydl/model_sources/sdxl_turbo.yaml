@@ -1,5 +1,0 @@
-description: "Stable Diffusion XL Turbo"
-source: "https://huggingface.co/stabilityai/sdxl-turbo"
-downloads:
-  - url: "https://huggingface.co/stabilityai/sdxl-turbo/resolve/main/sd_xl_turbo_1.0_fp16.safetensors"
-    dest: "models/checkpoints/sd_xl_turbo_1.0_fp16.safetensors"

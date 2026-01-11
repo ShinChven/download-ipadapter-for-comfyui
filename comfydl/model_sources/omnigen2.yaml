@@ -1,9 +1,0 @@
-description: "OmniGen2 Unified model (FP16)"
-source: "https://docs.comfy.org/tutorials/image/omnigen/omnigen2"
-downloads:
-  - url: "https://huggingface.co/Comfy-Org/Omnigen2_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/omnigen2_fp16.safetensors"
-    dest: "models/diffusion_models/omnigen2_fp16.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Omnigen2_ComfyUI_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_fp16.safetensors"
-    dest: "models/text_encoders/qwen_2.5_vl_fp16.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Lumina_Image_2.0_Repackaged/resolve/main/split_files/vae/ae.safetensors"
-    dest: "models/vae/ae.safetensors"

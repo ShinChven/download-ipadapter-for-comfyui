@@ -1,7 +1,0 @@
-description: "Qwen Image - InstantX ControlNet"
-source: "https://huggingface.co/Comfy-Org/Qwen-Image-InstantX-ControlNets"
-downloads:
-  - url: "https://huggingface.co/Comfy-Org/Qwen-Image-InstantX-ControlNets/resolve/main/split_files/controlnet/Qwen-Image-InstantX-ControlNet-Inpainting.safetensors"
-    dest: "models/controlnet/Qwen-Image-InstantX-ControlNet-Inpainting.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Qwen-Image-InstantX-ControlNets/resolve/main/split_files/controlnet/Qwen-Image-InstantX-ControlNet-Union.safetensors"
-    dest: "models/controlnet/Qwen-Image-InstantX-ControlNet-Union.safetensors"

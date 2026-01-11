@@ -1,5 +1,0 @@
-description: "Stable Diffusion 3.5 Large"
-source: "https://huggingface.co/stabilityai/stable-diffusion-3.5-large"
-downloads:
-  - url: "https://huggingface.co/stabilityai/stable-diffusion-3.5-large/resolve/main/sd3.5_large.safetensors"
-    dest: "models/checkpoints/sd3.5_large.safetensors"

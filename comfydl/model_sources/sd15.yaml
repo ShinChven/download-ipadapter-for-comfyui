@@ -1,5 +1,0 @@
-description: "Stable Diffusion v1.5 (Pruned EMA-only FP16)"
-source: "https://docs.comfy.org/tutorials/basic/text-to-image"
-downloads:
-  - url: "https://huggingface.co/Comfy-Org/stable-diffusion-v1-5-archive/resolve/main/v1-5-pruned-emaonly-fp16.safetensors"
-    dest: "models/checkpoints/v1-5-pruned-emaonly-fp16.safetensors"

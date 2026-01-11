@@ -1,5 +1,0 @@
-description: "GLIGEN (Grounded Language-to-Image Generation)"
-source: "https://huggingface.co/comfyanonymous/GLIGEN_pruned_safetensors"
-downloads:
-  - url: "https://huggingface.co/comfyanonymous/GLIGEN_pruned_safetensors/resolve/main/gligen_sd14_textbox_pruned_fp16.safetensors"
-    dest: "models/gligen/gligen_sd14_textbox_pruned_fp16.safetensors"

@@ -1,5 +1,0 @@
-description: "Stable Diffusion XL Lightning (1-step UNet)"
-source: "https://huggingface.co/ByteDance/SDXL-Lightning"
-downloads:
-  - url: "https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/sdxl_lightning_1step_unet_x0.safetensors"
-    dest: "models/unet/sdxl_lightning_1step_unet_x0.safetensors"

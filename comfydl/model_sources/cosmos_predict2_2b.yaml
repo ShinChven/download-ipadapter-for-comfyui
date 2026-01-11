@@ -1,9 +1,0 @@
-description: "Cosmos-Predict2 2B Text-to-Image (FP8 Repackaged)"
-source: "https://docs.comfy.org/tutorials/image/cosmos/cosmos-predict2-t2i"
-downloads:
-  - url: "https://huggingface.co/Comfy-Org/Cosmos_Predict2_repackaged/resolve/main/cosmos_predict2_2B_t2i.safetensors"
-    dest: "models/diffusion_models/cosmos_predict2_2B_t2i.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Cosmos_Predict2_repackaged/resolve/main/oldt5_xxl_fp8_e4m3fn_scaled.safetensors"
-    dest: "models/text_encoders/oldt5_xxl_fp8_e4m3fn_scaled.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/Cosmos_Predict2_repackaged/resolve/main/cosmos_cv8x8x8_1.0.safetensors"
-    dest: "models/vae/cosmos_cv8x8x8_1.0.safetensors"

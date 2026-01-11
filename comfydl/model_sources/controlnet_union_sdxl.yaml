@@ -1,5 +1,0 @@
-description: "SDXL union controlnet"
-source: "https://huggingface.co/xinsir/controlnet-union-sdxl-1.0"
-downloads:
-  - url: "https://huggingface.co/xinsir/controlnet-union-sdxl-1.0/resolve/main/diffusion_pytorch_model_promax.safetensors"
-    dest: "models/controlnet/controlnet++_union_sdxl.safetensors"

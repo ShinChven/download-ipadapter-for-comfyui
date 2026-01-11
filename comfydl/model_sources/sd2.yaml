@@ -1,7 +1,0 @@
-description: "Stable Diffusion 2"
-source: "https://huggingface.co/stabilityai"
-downloads:
-  - url: "https://huggingface.co/stabilityai/stable-diffusion-2-1-base/resolve/main/v2-1_512-ema-pruned.safetensors"
-    dest: "models/checkpoints/v2-1_512-ema-pruned.safetensors"
-  - url: "https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.safetensors"
-    dest: "models/checkpoints/v2-1_768-ema-pruned.safetensors"

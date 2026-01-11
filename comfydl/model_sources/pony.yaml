@@ -1,5 +1,0 @@
-description: "Pony Diffusion V6 XL (Stable Diffusion XL)"
-source: "https://civitai.com/models/257749/pony-diffusion-v6-xl"
-downloads:
-  - url: "https://civitai.com/api/download/models/290640"
-    dest: "models/checkpoints/ponyDiffusionV6XL_v6StartWithThisOne.safetensors"

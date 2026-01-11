@@ -1,5 +1,0 @@
-description: "DreamShaper XL Turbo (Stable Diffusion XL)"
-source: "https://civitai.com/models/112902/dreamshaper-xl"
-downloads:
-  - url: "https://civitai.com/api/download/models/354657"
-    dest: "models/checkpoints/dreamshaperXL_lightningDPMSDE.safetensors"

@@ -1,5 +1,0 @@
-description: "Hyper-SD SDXL UNet (1-step)"
-source: "https://huggingface.co/ByteDance/Hyper-SD"
-downloads:
-  - url: "https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SDXL-1step-Unet.safetensors"
-    dest: "models/unet/Hyper-SDXL-1step-Unet.safetensors"

@@ -1,5 +1,0 @@
-description: "Hyper-SD SD3 LoRA (16-step CFG)"
-source: "https://huggingface.co/ByteDance/Hyper-SD"
-downloads:
-  - url: "https://huggingface.co/ByteDance/Hyper-SD/resolve/main/Hyper-SD3-16steps-CFG-lora.safetensors"
-    dest: "models/loras/Hyper-SD3-16steps-CFG-lora.safetensors"

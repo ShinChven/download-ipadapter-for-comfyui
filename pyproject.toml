@@ -33,4 +33,3 @@ packages = ["comfydl"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-comfydl = ["model_sources/*.yaml"]

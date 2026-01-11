@@ -1,7 +1,0 @@
-description: "Common VAE models including SD1.5 MSE and SDXL VAE"
-source: "https://huggingface.co/stabilityai"
-downloads:
-  - url: "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors"
-    dest: "models/vae/vae-ft-mse-840000-ema-pruned.safetensors"
-  - url: "https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors?download=true"
-    dest: "models/vae/sdxl_vae.safetensors"

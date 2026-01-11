@@ -1,7 +1,0 @@
-description: "LTX-Video 2B v0.9.5"
-source: "https://docs.comfy.org/tutorials/video/ltxv"
-downloads:
-  - url: "https://huggingface.co/Lightricks/LTX-Video/resolve/main/ltx-video-2b-v0.9.5.safetensors?download=true"
-    dest: "models/checkpoints/ltx-video-2b-v0.9.5.safetensors"
-  - url: "https://huggingface.co/Comfy-Org/mochi_preview_repackaged/resolve/main/split_files/text_encoders/t5xxl_fp16.safetensors?download=true"
-    dest: "models/text_encoders/t5xxl_fp16.safetensors"

@@ -1,5 +1,0 @@
-description: "ChilloutMix (Stable Diffusion 1.5)"
-source: "https://civitai.com/models/6424/chilloutmix"
-downloads:
-  - url: "https://civitai.com/api/download/models/11745"
-    dest: "models/checkpoints/chilloutmix_NiPrunedFp32Fix.safetensors"

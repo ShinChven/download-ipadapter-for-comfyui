@@ -1,5 +1,0 @@
-description: "ControlNet v1.1 lineart_anime for Stable Diffusion 1.5"
-source: "https://huggingface.co/comfyanonymous/ControlNet-v1-1_fp16_safetensors"
-downloads:
-  - url: "https://huggingface.co/comfyanonymous/ControlNet-v1-1_fp16_safetensors/resolve/main/control_v11p_sd15s2_lineart_anime_fp16.safetensors"
-    dest: "models/controlnet/control_v11p_sd15s2_lineart_anime_fp16.safetensors"

@@ -1,9 +1,0 @@
-description: "T2I-Adapter models (SDXL) for ControlNet"
-source: "https://huggingface.co/TencentARC/T2I-Adapter"
-downloads:
-  - url: "https://huggingface.co/TencentARC/T2I-Adapter/resolve/main/models_XL/adapter-xl-canny.pth"
-    dest: "models/controlnet/adapter-xl-canny.pth"
-  - url: "https://huggingface.co/TencentARC/T2I-Adapter/resolve/main/models_XL/adapter-xl-openpose.pth"
-    dest: "models/controlnet/adapter-xl-openpose.pth"
-  - url: "https://huggingface.co/TencentARC/T2I-Adapter/resolve/main/models_XL/adapter-xl-sketch.pth"
-    dest: "models/controlnet/adapter-xl-sketch.pth"

@@ -1,5 +1,0 @@
-description: "DreamShaper 8 (Stable Diffusion 1.5)"
-source: "https://civitai.com/models/4384/dreamshaper"
-downloads:
-  - url: "https://civitai.com/api/download/models/128713"
-    dest: "models/checkpoints/dreamshaper_8.safetensors"

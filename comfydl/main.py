@@ -8,6 +8,7 @@ from .config import set_config_value, get_config_value
 from .utils import check_downloader, download_file, get_remote_file_size, format_size, check_disk_space
 import questionary
 from . import __version__
+from .registry import init_registries, update_registry, load_registry_sources, resolve_registry_source, add_registry, remove_registry, get_registries
 
 
 
@@ -46,18 +47,7 @@ def resolve_model_source(source_name):
         if candidate.exists():
             return str(candidate)
     
-    # Check in local model_sources directory (bundled with package)
-    package_dir = Path(__file__).parent
-    bundled_sources = package_dir / "model_sources"
-    
-    if bundled_sources.exists():
-        candidate = bundled_sources / f"{source_name}.yaml"
-        if candidate.exists():
-            return str(candidate)
-            
-        candidate = bundled_sources / source_name
-        if candidate.exists():
-            return str(candidate)
+
             
     # Check in subdirectory of current working directory (comfydl/model_sources)
     local_dev_sources = Path("comfydl/model_sources")
@@ -78,6 +68,29 @@ def resolve_model_source(source_name):
     # Maybe package provided sources? For now we assume local execution context
     return None
 
+def get_source_config(source_name):
+    """
+    Resolve a source name to a configuration dictionary.
+    Returns (config_dict, source_origin_description)
+    """
+    # 1. Check local file paths (legacy/development override)
+    path = resolve_model_source(source_name)
+    if path:
+        try:
+            with open(path, 'r') as f:
+                return yaml.safe_load(f), path
+        except Exception as e:
+            print(f"Error loading local source {path}: {e}")
+            return None, None
+
+    # 2. Check registries
+    init_registries()
+    config = resolve_registry_source(source_name)
+    if config:
+        return config, f"registry:{source_name}"
+        
+    return None, None
+
 def get_available_sources():
     sources = set()
     
@@ -93,12 +106,7 @@ def get_available_sources():
         for f in user_sources.glob("*.yaml"):
             sources.add(f.stem)
 
-    # Check bundled
-    package_dir = Path(__file__).parent
-    bundled_sources = package_dir / "model_sources"
-    if bundled_sources.exists():
-        for f in bundled_sources.glob("*.yaml"):
-            sources.add(f.stem)
+
     
     # Check local development
     local_dev_sources = Path("comfydl/model_sources")
@@ -112,6 +120,11 @@ def get_available_sources():
         for f in cwd_sources.glob("*.yaml"):
             sources.add(f.stem)
             
+    # Add registry sources
+    init_registries()
+    registry_sources = load_registry_sources()
+    sources.update(registry_sources.keys())
+
     return sorted(list(sources))
 
 def get_downloads_status(downloads, comfyui_path, fetch_remote_size=False):
@@ -198,22 +211,21 @@ def print_source_tree(source_name, items_status, indent=""):
             child_label = f" {connector} [{item_symbol}] {name}"
             print(f"{indent}  {child_label:<{padding + 2}}{size_str}")
 
-def process_download(model_source_path, comfyui_path, downloader=None, skip_prompt=False):
+def process_download(source_name, comfyui_path, downloader=None, skip_prompt=False):
     if not downloader:
         downloader = check_downloader()
         if not downloader:
             print("Error: Neither aria2c nor wget found. Please install one of them.")
             return False
             
-    try:
-        with open(model_source_path, 'r') as f:
-            config_data = yaml.safe_load(f)
-    except Exception as e:
-        print(f"Error loading YAML: {e}")
+    config_data, origin = get_source_config(source_name)
+    
+    if not config_data:
+        print(f"Error: Could not load configuration for source '{source_name}'")
         return False
-        
+
     if config_data is None:
-        print(f"Error: Empty configuration file: {model_source_path}")
+        print(f"Error: Empty configuration for: {source_name}")
         return False
 
     downloads = []
@@ -226,11 +238,9 @@ def process_download(model_source_path, comfyui_path, downloader=None, skip_prom
         print(f"Warning: No downloads found in {model_source_path}")
         return True
 
-    source_name = os.path.basename(model_source_path)
-    if source_name.endswith('.yaml'):
-        source_name = source_name[:-5]
-
-    print(f"\nSource: {source_name}")
+    source_name = source_name # kept for display
+        
+    print(f"\nSource: {source_name} ({origin})")
     print(f"ComfyUI Path: {comfyui_path}")
     
     # Show status tree before downloading
@@ -296,19 +306,18 @@ def handle_rm(model_sources, comfyui_path, force=False, dry_run=False):
             return
 
     for source_name in model_sources:
-        model_source_path = resolve_model_source(source_name)
-        if not model_source_path:
+        config_data, _ = get_source_config(source_name)
+        
+        if not config_data:
             print(f"Error: Model source '{source_name}' not found.")
             continue
             
         print(f"\nProcessing removal for: {source_name}")
         
-        try:
-            with open(model_source_path, 'r') as f:
-                config_data = yaml.safe_load(f)
-        except Exception as e:
-            print(f"Error loading YAML: {e}")
-            continue
+        # indent fix? No, just logic flow replacement
+        pass
+            
+            
             
         downloads = []
         if isinstance(config_data, list):
@@ -377,14 +386,9 @@ def list_sources_status(comfyui_path):
     print("Legend: [✓] Installed, [ ] Missing, [!] Partially Installed\n")
     
     for source_name in sources:
-        model_source_path = resolve_model_source(source_name)
-        if not model_source_path:
-            continue
-            
-        try:
-            with open(model_source_path, 'r') as f:
-                config_data = yaml.safe_load(f)
-        except Exception:
+        config_data, _ = get_source_config(source_name)
+        
+        if not config_data:
             continue
             
         downloads = []
@@ -412,21 +416,15 @@ def search_url_in_sources(url):
     """
     sources = get_available_sources()
     for source in sources:
-        path = resolve_model_source(source)
-        if not path:
-            continue
-            
-        try:
-            with open(path, 'r') as f:
-                data = yaml.safe_load(f)
-        except Exception:
+        config_data, _ = get_source_config(source)
+        if not config_data:
             continue
             
         downloads = []
-        if isinstance(data, list):
-            downloads = data
-        elif isinstance(data, dict):
-            downloads = data.get('downloads', [])
+        if isinstance(config_data, list):
+            downloads = config_data
+        elif isinstance(config_data, dict):
+            downloads = config_data.get('downloads', [])
             
         for item in downloads:
             if item.get('url') == url:
@@ -559,7 +557,15 @@ def handle_url_download(url, comfyui_path, target_dir=None, skip_prompt=False, d
 
     download_file(url, full_dest_path, downloader)
 def main():
-    parser = argparse.ArgumentParser(description="ComfyDL: ComfyUI Model Downloader\nhttps://github.com/ShinChven/comfydl")
+    parser = argparse.ArgumentParser(
+        description="""ComfyDL: ComfyUI Model Downloader
+https://github.com/ShinChven/comfydl
+
+Usage:
+  comfydl <source> [path]   Download a model source (e.g. 'flux')
+  comfydl <subcommand> ...  Run a specific command""",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     subparsers = parser.add_subparsers(dest="command")
     
     # Set command
@@ -576,7 +582,29 @@ def main():
     # Sources command
     sources_parser = subparsers.add_parser("sources", help="List available model sources")
     sources_parser.add_argument("--installed", action="store_true", help="Show installation status in ComfyUI")
+
     sources_parser.add_argument("--comfyui_path", help="ComfyUI root directory override")
+
+    # Registry command
+    registry_parser = subparsers.add_parser("registry", help="Manage model registries")
+    registry_subparsers = registry_parser.add_subparsers(dest="registry_command", required=True)
+
+    # registry add
+    reg_add = registry_subparsers.add_parser("add", help="Add a registry URL")
+    reg_add.add_argument("url", help="URL of the registry JSON")
+    reg_add.add_argument("--name", help="Optional name for the registry")
+
+    # registry delete
+    reg_del = registry_subparsers.add_parser("delete", help="Delete a registry")
+    reg_del.add_argument("url", help="URL of the registry to delete")
+
+    # registry list
+    reg_list = registry_subparsers.add_parser("list", help="List configured registries")
+
+    # registry update
+    reg_update = registry_subparsers.add_parser("update", help="Update registries")
+    reg_update.add_argument("registry_name", nargs="?", help="Specific registry name to update")
+
 
     # List command (local models)
     list_parser = subparsers.add_parser("list", help="List downloaded models in ComfyUI models directory")
@@ -594,6 +622,10 @@ def main():
     # Otherwise, we treat it as the legacy/default behavior.
     
     if len(sys.argv) > 1:
+        if sys.argv[1] in ["-h", "--help"]:
+            parser.print_help()
+            sys.exit(0)
+
         if sys.argv[1] == "set":
             args = parser.parse_args()
             handle_set(args.key, args.value)
@@ -619,6 +651,70 @@ def main():
                 print(f"Warning: '{comfyui_path}' does not look like a ComfyUI directory (main.py missing).")
 
             process_civitai_download(args.version_id, comfyui_path, skip_prompt=args.yes)
+            return
+        elif sys.argv[1] == "registry":
+            args, _ = parser.parse_known_args()
+            
+            if args.registry_command == "add":
+                url = args.url
+                name = args.name
+                if not name:
+                    # Deduce name from URL filename
+                    filename = os.path.basename(url)
+                    if filename.lower().endswith('.json'):
+                        name = filename[:-5]
+                    else:
+                        name = filename
+                
+                # Basic validation
+                if not name:
+                    print("Error: Could not determine registry name from URL. Please use --name.")
+                    sys.exit(1)
+                    
+                add_registry(name, url)
+                update_registry(name)
+                
+            elif args.registry_command == "delete":
+                url = args.url
+                # We store by name, so we need to find the name for this URL
+                registries = get_registries()
+                found_name = None
+                for n, u in registries.items():
+                    if u == url:
+                        found_name = n
+                        break
+                
+                if found_name:
+                    remove_registry(found_name)
+                    print(f"Registry '{found_name}' ({url}) removed.")
+                    # delete cache file?
+                    # we should delete the cache file too ideally
+                    try:
+                        from .config import get_registry_path
+                        p = get_registry_path(found_name)
+                        if p.exists():
+                            os.remove(p)
+                    except Exception:
+                        pass
+                else:
+                    print(f"Error: Registry with URL '{url}' not found.")
+                    
+            elif args.registry_command == "list":
+                registries = get_registries()
+                if not registries:
+                    print("No registries configured.")
+                    # Check if default needs init
+                    # init_registries() # auto init?
+                    # registries = get_registries()
+                
+                if registries:
+                     print("Configured Registries:")
+                     for name, url in registries.items():
+                         print(f"  - {name}: {url}")
+            
+            elif args.registry_command == "update":
+                update_registry(args.registry_name)
+            
             return
         elif sys.argv[1] == "sources":
             args, _ = parser.parse_known_args()
@@ -740,13 +836,7 @@ def main():
         elif args.model_source.startswith("http://") or args.model_source.startswith("https://"):
             handle_url_download(args.model_source, comfyui_path, target_dir=args.directory, skip_prompt=args.yes, downloader=downloader)
         else:
-            model_source_path = resolve_model_source(args.model_source)
-            if not model_source_path:
-                print(f"Error: Model source '{args.model_source}' not found.")
-                print("Try 'comfydl sources' to see available sources.")
-                sys.exit(1)
-            
-            process_download(model_source_path, comfyui_path, downloader, skip_prompt=args.yes)
+            process_download(args.model_source, comfyui_path, downloader, skip_prompt=args.yes)
     else:
         # Interactive mode
         sources = get_available_sources()
@@ -764,9 +854,7 @@ def main():
             sys.exit(0)
             
         for source_name in selected:
-             model_source_path = resolve_model_source(source_name)
-             if model_source_path:
-                 process_download(model_source_path, comfyui_path, downloader, skip_prompt=args.yes)
+             process_download(source_name, comfyui_path, downloader, skip_prompt=args.yes)
 
 if __name__ == "__main__":
     main()

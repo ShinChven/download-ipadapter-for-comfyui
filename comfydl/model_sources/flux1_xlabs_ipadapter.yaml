@@ -1,7 +1,0 @@
-description: "XLabs-AI Flux IP-Adapter"
-source: "https://huggingface.co/XLabs-AI/flux-ip-adapter"
-downloads:
-  - url: "https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/model.safetensors"
-    dest: "models/clip_vision/clip_l.safetensors"
-  - url: "https://huggingface.co/XLabs-AI/flux-ip-adapter/resolve/main/ip_adapter.safetensors"
-    dest: "models/xlabs/ipadapters/ip_adapter.safetensors"

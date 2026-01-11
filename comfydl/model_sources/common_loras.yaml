@@ -1,9 +1,0 @@
-description: "Common LoRA models including contrast fix and SDXL offset noise"
-source: "https://civitai.com"
-downloads:
-  - url: "https://civitai.com/api/download/models/10350"
-    dest: "models/loras/theovercomer8sContrastFix_sd21768.safetensors"
-  - url: "https://civitai.com/api/download/models/10638"
-    dest: "models/loras/theovercomer8sContrastFix_sd15.safetensors"
-  - url: "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_offset_example-lora_1.0.safetensors"
-    dest: "models/loras/sd_xl_offset_example-lora_1.0.safetensors"
